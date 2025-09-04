@@ -1,9 +1,11 @@
 # Device Driver Development on Linux by Raymond
 
-This is a series of labs to learn Device Driver Development on Linux. 
+This is a series of live casts to learn Device Driver Development on Linux. 
 
 ## Two warm up sessions:
+
 8.28 The 4th of six BKMs to learn Linux kernel
+
 9.04 The 3 pitfalls and 3 shortcuts to learn DDD 
 
 ## Six sessions for the first season on Autumn 2025  
