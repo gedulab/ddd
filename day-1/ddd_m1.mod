@@ -1,0 +1,1 @@
+/home/geduer/ddd/day-1/ddd_m1.o
