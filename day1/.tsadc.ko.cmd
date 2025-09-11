@@ -1,0 +1,1 @@
+cmd_/home/geduer/ddd/day1/tsadc.ko := ld -r -EL  -maarch64elf -z noexecstack --no-warn-rwx-segments --build-id=sha1  -T scripts/module.lds -o /home/geduer/ddd/day1/tsadc.ko /home/geduer/ddd/day1/tsadc.o /home/geduer/ddd/day1/tsadc.mod.o;  true

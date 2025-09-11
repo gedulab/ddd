@@ -1,0 +1,73 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <poll.h>
+
+// Must match the definitions in the driver
+#define TSADC_MAGIC 'T'
+#define TSADC_SET_CHANNEL _IOW(TSADC_MAGIC, 1, int)
+#define TSADC_GET_CHANNEL _IOR(TSADC_MAGIC, 2, int)
+#define TSADC_SET_INT_THRESHOLD _IOW(TSADC_MAGIC, 3, int)
+
+int main() {
+    int fd;
+    char buffer[16];
+    int channel, threshold;
+    struct pollfd pfd;
+    int ret;
+
+    fd = open("/dev/rk3588_tsadc", O_RDWR);
+    if (fd < 0) {
+        perror("Failed to open device");
+        return -1;
+    }
+
+    // --- Test 1: Set channel and read temperature ---
+    printf("--- Test 1: Basic Read ---\n");
+    channel = 0; // Use channel 0
+    if (ioctl(fd, TSADC_SET_CHANNEL, &channel) < 0) {
+        perror("ioctl TSADC_SET_CHANNEL failed");
+    }
+    printf("Set channel to %d\n", channel);
+
+    printf("Reading temperature for 5 seconds...\n");
+    for (int i = 0; i < 5; ++i) {
+        lseek(fd, 0, SEEK_SET); // Reset read pointer
+        if (read(fd, buffer, sizeof(buffer)) > 0) {
+            printf("Temperature: %sC", buffer);
+        }
+        sleep(1);
+    }
+
+    // --- Test 2: Set interrupt threshold and wait for it ---
+    printf("\n--- Test 2: Interrupt Poll ---\n");
+    threshold = 30; // Set a low threshold for easy testing
+    printf("Setting interrupt threshold to %d C. Try heating the chip.\n", threshold);
+    if (ioctl(fd, TSADC_SET_INT_THRESHOLD, &threshold) < 0) {
+        perror("ioctl TSADC_SET_INT_THRESHOLD failed");
+    }
+
+    pfd.fd = fd;
+    pfd.events = POLLIN;
+    
+    printf("Waiting for temperature threshold to be crossed (timeout 15s)...\n");
+    ret = poll(&pfd, 1, 15000); // Wait for 15 seconds
+
+    if (ret < 0) {
+        perror("poll failed");
+    } else if (ret == 0) {
+        printf("Poll timed out. Threshold not reached.\n");
+    } else {
+        if (pfd.revents & POLLIN) {
+            lseek(fd, 0, SEEK_SET);
+            if (read(fd, buffer, sizeof(buffer)) > 0) {
+                printf("Threshold crossed! Current temperature: %sC", buffer);
+            }
+        }
+    }
+
+    close(fd);
+    return 0;
+}
