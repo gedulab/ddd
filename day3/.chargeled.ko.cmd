@@ -1,0 +1,1 @@
+cmd_/home/geduer/ddd/day3/chargeled.ko := ld -r -EL  -maarch64elf -z noexecstack --no-warn-rwx-segments --build-id=sha1  -T scripts/module.lds -o /home/geduer/ddd/day3/chargeled.ko /home/geduer/ddd/day3/chargeled.o /home/geduer/ddd/day3/chargeled.mod.o;  true
